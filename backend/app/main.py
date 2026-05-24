@@ -1,8 +1,6 @@
-import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.utils.logger import get_logger
@@ -13,15 +11,13 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     try:
         from app.db.session import init_db
         init_db()
         logger.info(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} started")
     except Exception as exc:
-        logger.error(f"Startup error (non-fatal): {exc}")
+        logger.error(f"DB init failed (non-fatal — set DATABASE_URL to enable): {exc}")
     yield
-    # Shutdown
     logger.info("Shutting down...")
 
 
@@ -34,16 +30,22 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# ── Middleware ─────────────────────────────────────────────────────────────────
+# ── CORS ──────────────────────────────────────────────────────────────────────
+# allow_credentials=True requires explicit origins (not "*").
+# When the caller passes "*" we disable credentials to keep browsers happy.
+_origins = settings.CORS_ORIGINS
+_allow_credentials = "*" not in _origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
-# ── Request size guard ─────────────────────────────────────────────────────────
+# ── Request size guard ────────────────────────────────────────────────────────
 @app.middleware("http")
 async def limit_request_size(request: Request, call_next):
     content_length = request.headers.get("content-length")
@@ -51,7 +53,7 @@ async def limit_request_size(request: Request, call_next):
         return JSONResponse(status_code=413, content={"detail": "Request body too large"})
     return await call_next(request)
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# ── Routes ────────────────────────────────────────────────────────────────────
 app.include_router(auth.router,           prefix="/api/v1")
 app.include_router(projects.router,       prefix="/api/v1")
 app.include_router(chat.router,           prefix="/api/v1")
@@ -68,7 +70,7 @@ def root():
     return {"message": f"Welcome to {settings.APP_NAME} API", "docs": "/docs"}
 
 
-# ── Global exception handler ───────────────────────────────────────────────────
+# ── Global exception handler ──────────────────────────────────────────────────
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception on {request.url}: {exc}", exc_info=True)

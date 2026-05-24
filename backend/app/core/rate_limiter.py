@@ -9,14 +9,13 @@ _lock = Lock()
 
 
 def rate_limit(request: Request) -> None:
-    ip = request.client.host if request.client else "unknown"
+    ip = (request.client.host if request.client else None) or "unknown"
     now = time.time()
     window = settings.RATE_LIMIT_WINDOW
     limit = settings.RATE_LIMIT_REQUESTS
 
     with _lock:
-        timestamps = _store[ip]
-        _store[ip] = [t for t in timestamps if now - t < window]
+        _store[ip] = [t for t in _store[ip] if now - t < window]
         if len(_store[ip]) >= limit:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,

@@ -7,7 +7,6 @@ from app.services.ai_service import (
     analyze_messages,
     generate_prioritized_roadmap,
     serialize_list,
-    deserialize_list,
 )
 
 
