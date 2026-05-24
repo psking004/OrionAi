@@ -24,6 +24,8 @@ class Project(Base):
     owner = relationship("User", back_populates="projects")
     messages = relationship("Message", back_populates="project", cascade="all, delete-orphan")
     statuses = relationship("ProjectStatus", back_populates="project", cascade="all, delete-orphan")
+    github_connection = relationship("GitHubConnection", back_populates="project", uselist=False, cascade="all, delete-orphan")
+    upload_analyses = relationship("UploadAnalysis", back_populates="project", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_projects_owner_status", "owner_id", "status"),

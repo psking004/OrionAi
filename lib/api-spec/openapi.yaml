@@ -18,6 +18,16 @@ tags:
     description: Chat messages
   - name: status
     description: Project health and AI analysis
+  - name: github
+    description: GitHub repository integration
+  - name: upload
+    description: ZIP upload and code analysis
+  - name: agents
+    description: AI multi-agent team
+  - name: debug
+    description: AI debug engine
+  - name: tasks
+    description: Task breakdown and roadmap
 
 paths:
   /healthz:
@@ -295,6 +305,281 @@ paths:
               schema:
                 $ref: "#/components/schemas/NextSteps"
 
+  /projects/{projectId}/github/connect:
+    post:
+      operationId: connectGithub
+      tags: [github]
+      summary: Connect a GitHub repository via personal access token
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitHubConnectInput"
+      responses:
+        "200":
+          description: Connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitHubConnection"
+        "400":
+          description: Invalid token or repo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /projects/{projectId}/github:
+    get:
+      operationId: getGithubConnection
+      tags: [github]
+      summary: Get GitHub connection for a project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitHubConnection"
+        "404":
+          description: No connection found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: disconnectGithub
+      tags: [github]
+      summary: Disconnect GitHub repository
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Disconnected
+
+  /projects/{projectId}/github/sync:
+    post:
+      operationId: syncGithub
+      tags: [github]
+      summary: Sync and analyze the connected GitHub repository
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitHubSyncResult"
+
+  /projects/{projectId}/upload:
+    post:
+      operationId: uploadProjectZip
+      tags: [upload]
+      summary: Upload a ZIP file for AI analysis
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Analysis started (may be processing)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadAnalysis"
+
+  /projects/{projectId}/uploads:
+    get:
+      operationId: listUploads
+      tags: [upload]
+      summary: List all upload analyses for a project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UploadAnalysis"
+
+  /projects/{projectId}/uploads/latest:
+    get:
+      operationId: getLatestUpload
+      tags: [upload]
+      summary: Get the latest completed upload analysis
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadAnalysis"
+        "404":
+          description: No completed analysis found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /projects/{projectId}/agents:
+    get:
+      operationId: getAgentTeam
+      tags: [agents]
+      summary: Get AI multi-agent team recommendations (CTO, PM, QA, DevOps, Security)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentTeamResponse"
+
+  /projects/{projectId}/debug:
+    post:
+      operationId: debugProject
+      tags: [debug]
+      summary: Submit logs or stack trace for AI debug analysis
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebugInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugResponse"
+
+  /projects/{projectId}/tasks:
+    post:
+      operationId: generateTasks
+      tags: [tasks]
+      summary: Generate task breakdown from a feature description
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskBreakdown"
+
+  /projects/{projectId}/predict:
+    get:
+      operationId: predictFailures
+      tags: [status]
+      summary: Predict deployment risks and failure points
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FailurePrediction"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -496,6 +781,362 @@ components:
           items:
             type: string
         steps:
+          type: array
+          items:
+            type: string
+
+    GitHubConnectInput:
+      type: object
+      required: [github_token, repo_owner, repo_name]
+      properties:
+        github_token:
+          type: string
+          description: GitHub personal access token (repo scope required)
+        repo_owner:
+          type: string
+        repo_name:
+          type: string
+
+    GitHubConnection:
+      type: object
+      required: [id, project_id, repo_owner, repo_name, default_branch, stars, forks, open_issues, commit_count, contributor_count, is_active, created_at]
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        repo_owner:
+          type: string
+        repo_name:
+          type: string
+        repo_url:
+          type: ["string", "null"]
+        default_branch:
+          type: string
+        description:
+          type: ["string", "null"]
+        language:
+          type: ["string", "null"]
+        stars:
+          type: integer
+        forks:
+          type: integer
+        open_issues:
+          type: integer
+        commit_count:
+          type: integer
+        contributor_count:
+          type: integer
+        last_synced:
+          type: ["string", "null"]
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    GitHubSyncResult:
+      type: object
+      required: [connection, commit_analysis, contributor_analysis, branch_analysis, velocity_score, risk_score, momentum_score, recent_activity, stalled_modules, risky_commits, recommendations]
+      properties:
+        connection:
+          $ref: "#/components/schemas/GitHubConnection"
+        commit_analysis:
+          type: object
+          additionalProperties: true
+        contributor_analysis:
+          type: object
+          additionalProperties: true
+        branch_analysis:
+          type: object
+          additionalProperties: true
+        language_breakdown:
+          type: object
+          additionalProperties: true
+        open_prs:
+          type: integer
+        velocity_score:
+          type: number
+        risk_score:
+          type: number
+        momentum_score:
+          type: number
+        recent_activity:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        stalled_modules:
+          type: array
+          items:
+            type: string
+        risky_commits:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    UploadAnalysis:
+      type: object
+      required: [id, project_id, filename, file_size, status, file_count, languages, frameworks, folder_tree, dependencies, issues, security_issues, performance_issues, health_score, architecture_score, debt_score, stability_score, recommendations, created_at]
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        filename:
+          type: string
+        file_size:
+          type: integer
+        status:
+          type: string
+          enum: [pending, processing, complete, failed]
+        file_count:
+          type: integer
+        languages:
+          type: array
+          items:
+            type: string
+        frameworks:
+          type: array
+          items:
+            type: string
+        architecture_type:
+          type: ["string", "null"]
+        architecture_summary:
+          type: ["string", "null"]
+        folder_tree:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        dependencies:
+          type: object
+          additionalProperties: true
+        issues:
+          type: array
+          items:
+            type: string
+        security_issues:
+          type: array
+          items:
+            type: string
+        performance_issues:
+          type: array
+          items:
+            type: string
+        health_score:
+          type: number
+        architecture_score:
+          type: number
+        debt_score:
+          type: number
+        stability_score:
+          type: number
+        recommendations:
+          type: array
+          items:
+            type: string
+        error_message:
+          type: ["string", "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    AgentReport:
+      type: object
+      required: [agent, role, recommendations, risks, priorities, actions, score]
+      properties:
+        agent:
+          type: string
+        role:
+          type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        risks:
+          type: array
+          items:
+            type: string
+        priorities:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+        score:
+          type: number
+
+    AgentTeamResponse:
+      type: object
+      required: [project_id, cto, pm, qa, devops, security, consensus_priorities, overall_risk_level]
+      properties:
+        project_id:
+          type: integer
+        cto:
+          $ref: "#/components/schemas/AgentReport"
+        pm:
+          $ref: "#/components/schemas/AgentReport"
+        qa:
+          $ref: "#/components/schemas/AgentReport"
+        devops:
+          $ref: "#/components/schemas/AgentReport"
+        security:
+          $ref: "#/components/schemas/AgentReport"
+        consensus_priorities:
+          type: array
+          items:
+            type: string
+        overall_risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+
+    DebugInput:
+      type: object
+      required: [logs]
+      properties:
+        logs:
+          type: string
+        error_trace:
+          type: ["string", "null"]
+        context:
+          type: ["string", "null"]
+
+    DebugResponse:
+      type: object
+      required: [project_id, root_cause, affected_modules, severity, suggested_fixes, prevention_strategies, similar_patterns]
+      properties:
+        project_id:
+          type: integer
+        error_type:
+          type: ["string", "null"]
+        root_cause:
+          type: string
+        affected_modules:
+          type: array
+          items:
+            type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        suggested_fixes:
+          type: array
+          items:
+            type: string
+        prevention_strategies:
+          type: array
+          items:
+            type: string
+        similar_patterns:
+          type: array
+          items:
+            type: string
+
+    TaskInput:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+        context:
+          type: ["string", "null"]
+
+    TaskItem:
+      type: object
+      required: [id, title, description, type, priority, estimated_hours, dependencies, milestone]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        priority:
+          type: string
+        estimated_hours:
+          type: number
+        dependencies:
+          type: array
+          items:
+            type: string
+        milestone:
+          type: string
+
+    TaskBreakdown:
+      type: object
+      required: [prompt, backend_tasks, frontend_tasks, testing_tasks, deployment_tasks, milestones, total_estimated_hours, recommended_sprint_weeks]
+      properties:
+        project_id:
+          type: integer
+        prompt:
+          type: string
+        backend_tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskItem"
+        frontend_tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskItem"
+        testing_tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskItem"
+        deployment_tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskItem"
+        milestones:
+          type: array
+          items:
+            type: string
+        total_estimated_hours:
+          type: number
+        recommended_sprint_weeks:
+          type: integer
+
+    FailurePrediction:
+      type: object
+      required: [deployment_risks, scalability_issues, unstable_modules, security_vulnerabilities, future_bottlenecks, overall_risk_score, risk_level, mitigation_strategies]
+      properties:
+        project_id:
+          type: integer
+        deployment_risks:
+          type: array
+          items:
+            type: string
+        scalability_issues:
+          type: array
+          items:
+            type: string
+        unstable_modules:
+          type: array
+          items:
+            type: string
+        security_vulnerabilities:
+          type: array
+          items:
+            type: string
+        future_bottlenecks:
+          type: array
+          items:
+            type: string
+        overall_risk_score:
+          type: number
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        mitigation_strategies:
           type: array
           items:
             type: string

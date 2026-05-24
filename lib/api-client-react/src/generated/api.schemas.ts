@@ -160,3 +160,219 @@ export interface NextSteps {
   steps: string[];
 }
 
+export interface GitHubConnectInput {
+  /** GitHub personal access token (repo scope required) */
+  github_token: string;
+  repo_owner: string;
+  repo_name: string;
+}
+
+export interface GitHubConnection {
+  id: number;
+  project_id: number;
+  repo_owner: string;
+  repo_name: string;
+  /** @nullable */
+  repo_url?: string | null;
+  default_branch: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  language?: string | null;
+  stars: number;
+  forks: number;
+  open_issues: number;
+  commit_count: number;
+  contributor_count: number;
+  /** @nullable */
+  last_synced?: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type GitHubSyncResultCommitAnalysis = { [key: string]: unknown };
+
+export type GitHubSyncResultContributorAnalysis = { [key: string]: unknown };
+
+export type GitHubSyncResultBranchAnalysis = { [key: string]: unknown };
+
+export type GitHubSyncResultLanguageBreakdown = { [key: string]: unknown };
+
+export type GitHubSyncResultRecentActivityItem = { [key: string]: unknown };
+
+export type GitHubSyncResultRiskyCommitsItem = { [key: string]: unknown };
+
+export interface GitHubSyncResult {
+  connection: GitHubConnection;
+  commit_analysis: GitHubSyncResultCommitAnalysis;
+  contributor_analysis: GitHubSyncResultContributorAnalysis;
+  branch_analysis: GitHubSyncResultBranchAnalysis;
+  language_breakdown?: GitHubSyncResultLanguageBreakdown;
+  open_prs?: number;
+  velocity_score: number;
+  risk_score: number;
+  momentum_score: number;
+  recent_activity: GitHubSyncResultRecentActivityItem[];
+  stalled_modules: string[];
+  risky_commits: GitHubSyncResultRiskyCommitsItem[];
+  recommendations: string[];
+}
+
+export type UploadAnalysisStatus = typeof UploadAnalysisStatus[keyof typeof UploadAnalysisStatus];
+
+
+export const UploadAnalysisStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  complete: 'complete',
+  failed: 'failed',
+} as const;
+
+export type UploadAnalysisFolderTreeItem = { [key: string]: unknown };
+
+export type UploadAnalysisDependencies = { [key: string]: unknown };
+
+export interface UploadAnalysis {
+  id: number;
+  project_id: number;
+  filename: string;
+  file_size: number;
+  status: UploadAnalysisStatus;
+  file_count: number;
+  languages: string[];
+  frameworks: string[];
+  /** @nullable */
+  architecture_type?: string | null;
+  /** @nullable */
+  architecture_summary?: string | null;
+  folder_tree: UploadAnalysisFolderTreeItem[];
+  dependencies: UploadAnalysisDependencies;
+  issues: string[];
+  security_issues: string[];
+  performance_issues: string[];
+  health_score: number;
+  architecture_score: number;
+  debt_score: number;
+  stability_score: number;
+  recommendations: string[];
+  /** @nullable */
+  error_message?: string | null;
+  created_at: string;
+}
+
+export interface AgentReport {
+  agent: string;
+  role: string;
+  recommendations: string[];
+  risks: string[];
+  priorities: string[];
+  actions: string[];
+  score: number;
+}
+
+export type AgentTeamResponseOverallRiskLevel = typeof AgentTeamResponseOverallRiskLevel[keyof typeof AgentTeamResponseOverallRiskLevel];
+
+
+export const AgentTeamResponseOverallRiskLevel = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  critical: 'critical',
+} as const;
+
+export interface AgentTeamResponse {
+  project_id: number;
+  cto: AgentReport;
+  pm: AgentReport;
+  qa: AgentReport;
+  devops: AgentReport;
+  security: AgentReport;
+  consensus_priorities: string[];
+  overall_risk_level: AgentTeamResponseOverallRiskLevel;
+}
+
+export interface DebugInput {
+  logs: string;
+  /** @nullable */
+  error_trace?: string | null;
+  /** @nullable */
+  context?: string | null;
+}
+
+export type DebugResponseSeverity = typeof DebugResponseSeverity[keyof typeof DebugResponseSeverity];
+
+
+export const DebugResponseSeverity = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  critical: 'critical',
+} as const;
+
+export interface DebugResponse {
+  project_id: number;
+  /** @nullable */
+  error_type?: string | null;
+  root_cause: string;
+  affected_modules: string[];
+  severity: DebugResponseSeverity;
+  suggested_fixes: string[];
+  prevention_strategies: string[];
+  similar_patterns: string[];
+}
+
+export interface TaskInput {
+  prompt: string;
+  /** @nullable */
+  context?: string | null;
+}
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  estimated_hours: number;
+  dependencies: string[];
+  milestone: string;
+}
+
+export interface TaskBreakdown {
+  project_id?: number;
+  prompt: string;
+  backend_tasks: TaskItem[];
+  frontend_tasks: TaskItem[];
+  testing_tasks: TaskItem[];
+  deployment_tasks: TaskItem[];
+  milestones: string[];
+  total_estimated_hours: number;
+  recommended_sprint_weeks: number;
+}
+
+export type FailurePredictionRiskLevel = typeof FailurePredictionRiskLevel[keyof typeof FailurePredictionRiskLevel];
+
+
+export const FailurePredictionRiskLevel = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  critical: 'critical',
+} as const;
+
+export interface FailurePrediction {
+  project_id?: number;
+  deployment_risks: string[];
+  scalability_issues: string[];
+  unstable_modules: string[];
+  security_vulnerabilities: string[];
+  future_bottlenecks: string[];
+  overall_risk_score: number;
+  risk_level: FailurePredictionRiskLevel;
+  mitigation_strategies: string[];
+}
+
+export type UploadProjectZipBody = {
+  file: Blob;
+};
+

@@ -218,3 +218,381 @@ export const GetNextStepsResponse = zod.object({
 })
 
 
+/**
+ * @summary Connect a GitHub repository via personal access token
+ */
+export const ConnectGithubParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const ConnectGithubBody = zod.object({
+  "github_token": zod.string().describe('GitHub personal access token (repo scope required)'),
+  "repo_owner": zod.string(),
+  "repo_name": zod.string()
+})
+
+export const ConnectGithubResponse = zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "repo_owner": zod.string(),
+  "repo_name": zod.string(),
+  "repo_url": zod.string().nullish(),
+  "default_branch": zod.string(),
+  "description": zod.string().nullish(),
+  "language": zod.string().nullish(),
+  "stars": zod.number(),
+  "forks": zod.number(),
+  "open_issues": zod.number(),
+  "commit_count": zod.number(),
+  "contributor_count": zod.number(),
+  "last_synced": zod.coerce.date().nullish(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get GitHub connection for a project
+ */
+export const GetGithubConnectionParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const GetGithubConnectionResponse = zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "repo_owner": zod.string(),
+  "repo_name": zod.string(),
+  "repo_url": zod.string().nullish(),
+  "default_branch": zod.string(),
+  "description": zod.string().nullish(),
+  "language": zod.string().nullish(),
+  "stars": zod.number(),
+  "forks": zod.number(),
+  "open_issues": zod.number(),
+  "commit_count": zod.number(),
+  "contributor_count": zod.number(),
+  "last_synced": zod.coerce.date().nullish(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Disconnect GitHub repository
+ */
+export const DisconnectGithubParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Sync and analyze the connected GitHub repository
+ */
+export const SyncGithubParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const SyncGithubResponse = zod.object({
+  "connection": zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "repo_owner": zod.string(),
+  "repo_name": zod.string(),
+  "repo_url": zod.string().nullish(),
+  "default_branch": zod.string(),
+  "description": zod.string().nullish(),
+  "language": zod.string().nullish(),
+  "stars": zod.number(),
+  "forks": zod.number(),
+  "open_issues": zod.number(),
+  "commit_count": zod.number(),
+  "contributor_count": zod.number(),
+  "last_synced": zod.coerce.date().nullish(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+}),
+  "commit_analysis": zod.record(zod.string(), zod.unknown()),
+  "contributor_analysis": zod.record(zod.string(), zod.unknown()),
+  "branch_analysis": zod.record(zod.string(), zod.unknown()),
+  "language_breakdown": zod.record(zod.string(), zod.unknown()).optional(),
+  "open_prs": zod.number().optional(),
+  "velocity_score": zod.number(),
+  "risk_score": zod.number(),
+  "momentum_score": zod.number(),
+  "recent_activity": zod.array(zod.record(zod.string(), zod.unknown())),
+  "stalled_modules": zod.array(zod.string()),
+  "risky_commits": zod.array(zod.record(zod.string(), zod.unknown())),
+  "recommendations": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Upload a ZIP file for AI analysis
+ */
+export const UploadProjectZipParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const UploadProjectZipBody = zod.object({
+  "file": zod.instanceof(File)
+})
+
+export const UploadProjectZipResponse = zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "filename": zod.string(),
+  "file_size": zod.number(),
+  "status": zod.enum(['pending', 'processing', 'complete', 'failed']),
+  "file_count": zod.number(),
+  "languages": zod.array(zod.string()),
+  "frameworks": zod.array(zod.string()),
+  "architecture_type": zod.string().nullish(),
+  "architecture_summary": zod.string().nullish(),
+  "folder_tree": zod.array(zod.record(zod.string(), zod.unknown())),
+  "dependencies": zod.record(zod.string(), zod.unknown()),
+  "issues": zod.array(zod.string()),
+  "security_issues": zod.array(zod.string()),
+  "performance_issues": zod.array(zod.string()),
+  "health_score": zod.number(),
+  "architecture_score": zod.number(),
+  "debt_score": zod.number(),
+  "stability_score": zod.number(),
+  "recommendations": zod.array(zod.string()),
+  "error_message": zod.string().nullish(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List all upload analyses for a project
+ */
+export const ListUploadsParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const ListUploadsResponseItem = zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "filename": zod.string(),
+  "file_size": zod.number(),
+  "status": zod.enum(['pending', 'processing', 'complete', 'failed']),
+  "file_count": zod.number(),
+  "languages": zod.array(zod.string()),
+  "frameworks": zod.array(zod.string()),
+  "architecture_type": zod.string().nullish(),
+  "architecture_summary": zod.string().nullish(),
+  "folder_tree": zod.array(zod.record(zod.string(), zod.unknown())),
+  "dependencies": zod.record(zod.string(), zod.unknown()),
+  "issues": zod.array(zod.string()),
+  "security_issues": zod.array(zod.string()),
+  "performance_issues": zod.array(zod.string()),
+  "health_score": zod.number(),
+  "architecture_score": zod.number(),
+  "debt_score": zod.number(),
+  "stability_score": zod.number(),
+  "recommendations": zod.array(zod.string()),
+  "error_message": zod.string().nullish(),
+  "created_at": zod.coerce.date()
+})
+export const ListUploadsResponse = zod.array(ListUploadsResponseItem)
+
+
+/**
+ * @summary Get the latest completed upload analysis
+ */
+export const GetLatestUploadParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const GetLatestUploadResponse = zod.object({
+  "id": zod.number(),
+  "project_id": zod.number(),
+  "filename": zod.string(),
+  "file_size": zod.number(),
+  "status": zod.enum(['pending', 'processing', 'complete', 'failed']),
+  "file_count": zod.number(),
+  "languages": zod.array(zod.string()),
+  "frameworks": zod.array(zod.string()),
+  "architecture_type": zod.string().nullish(),
+  "architecture_summary": zod.string().nullish(),
+  "folder_tree": zod.array(zod.record(zod.string(), zod.unknown())),
+  "dependencies": zod.record(zod.string(), zod.unknown()),
+  "issues": zod.array(zod.string()),
+  "security_issues": zod.array(zod.string()),
+  "performance_issues": zod.array(zod.string()),
+  "health_score": zod.number(),
+  "architecture_score": zod.number(),
+  "debt_score": zod.number(),
+  "stability_score": zod.number(),
+  "recommendations": zod.array(zod.string()),
+  "error_message": zod.string().nullish(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get AI multi-agent team recommendations (CTO, PM, QA, DevOps, Security)
+ */
+export const GetAgentTeamParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const GetAgentTeamResponse = zod.object({
+  "project_id": zod.number(),
+  "cto": zod.object({
+  "agent": zod.string(),
+  "role": zod.string(),
+  "recommendations": zod.array(zod.string()),
+  "risks": zod.array(zod.string()),
+  "priorities": zod.array(zod.string()),
+  "actions": zod.array(zod.string()),
+  "score": zod.number()
+}),
+  "pm": zod.object({
+  "agent": zod.string(),
+  "role": zod.string(),
+  "recommendations": zod.array(zod.string()),
+  "risks": zod.array(zod.string()),
+  "priorities": zod.array(zod.string()),
+  "actions": zod.array(zod.string()),
+  "score": zod.number()
+}),
+  "qa": zod.object({
+  "agent": zod.string(),
+  "role": zod.string(),
+  "recommendations": zod.array(zod.string()),
+  "risks": zod.array(zod.string()),
+  "priorities": zod.array(zod.string()),
+  "actions": zod.array(zod.string()),
+  "score": zod.number()
+}),
+  "devops": zod.object({
+  "agent": zod.string(),
+  "role": zod.string(),
+  "recommendations": zod.array(zod.string()),
+  "risks": zod.array(zod.string()),
+  "priorities": zod.array(zod.string()),
+  "actions": zod.array(zod.string()),
+  "score": zod.number()
+}),
+  "security": zod.object({
+  "agent": zod.string(),
+  "role": zod.string(),
+  "recommendations": zod.array(zod.string()),
+  "risks": zod.array(zod.string()),
+  "priorities": zod.array(zod.string()),
+  "actions": zod.array(zod.string()),
+  "score": zod.number()
+}),
+  "consensus_priorities": zod.array(zod.string()),
+  "overall_risk_level": zod.enum(['low', 'medium', 'high', 'critical'])
+})
+
+
+/**
+ * @summary Submit logs or stack trace for AI debug analysis
+ */
+export const DebugProjectParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const DebugProjectBody = zod.object({
+  "logs": zod.string(),
+  "error_trace": zod.string().nullish(),
+  "context": zod.string().nullish()
+})
+
+export const DebugProjectResponse = zod.object({
+  "project_id": zod.number(),
+  "error_type": zod.string().nullish(),
+  "root_cause": zod.string(),
+  "affected_modules": zod.array(zod.string()),
+  "severity": zod.enum(['low', 'medium', 'high', 'critical']),
+  "suggested_fixes": zod.array(zod.string()),
+  "prevention_strategies": zod.array(zod.string()),
+  "similar_patterns": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Generate task breakdown from a feature description
+ */
+export const GenerateTasksParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const GenerateTasksBody = zod.object({
+  "prompt": zod.string(),
+  "context": zod.string().nullish()
+})
+
+export const GenerateTasksResponse = zod.object({
+  "project_id": zod.number().optional(),
+  "prompt": zod.string(),
+  "backend_tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.string(),
+  "priority": zod.string(),
+  "estimated_hours": zod.number(),
+  "dependencies": zod.array(zod.string()),
+  "milestone": zod.string()
+})),
+  "frontend_tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.string(),
+  "priority": zod.string(),
+  "estimated_hours": zod.number(),
+  "dependencies": zod.array(zod.string()),
+  "milestone": zod.string()
+})),
+  "testing_tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.string(),
+  "priority": zod.string(),
+  "estimated_hours": zod.number(),
+  "dependencies": zod.array(zod.string()),
+  "milestone": zod.string()
+})),
+  "deployment_tasks": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.string(),
+  "priority": zod.string(),
+  "estimated_hours": zod.number(),
+  "dependencies": zod.array(zod.string()),
+  "milestone": zod.string()
+})),
+  "milestones": zod.array(zod.string()),
+  "total_estimated_hours": zod.number(),
+  "recommended_sprint_weeks": zod.number()
+})
+
+
+/**
+ * @summary Predict deployment risks and failure points
+ */
+export const PredictFailuresParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const PredictFailuresResponse = zod.object({
+  "project_id": zod.number().optional(),
+  "deployment_risks": zod.array(zod.string()),
+  "scalability_issues": zod.array(zod.string()),
+  "unstable_modules": zod.array(zod.string()),
+  "security_vulnerabilities": zod.array(zod.string()),
+  "future_bottlenecks": zod.array(zod.string()),
+  "overall_risk_score": zod.number(),
+  "risk_level": zod.enum(['low', 'medium', 'high', 'critical']),
+  "mitigation_strategies": zod.array(zod.string())
+})
+
+

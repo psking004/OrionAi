@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.utils.logger import get_logger
 from app.api.routes import auth, projects, chat, status as status_router
+from app.api.routes import github as github_router
+from app.api.routes import upload as upload_router
 
 logger = get_logger(__name__)
 
@@ -58,6 +60,8 @@ app.include_router(auth.router,           prefix="/api/v1")
 app.include_router(projects.router,       prefix="/api/v1")
 app.include_router(chat.router,           prefix="/api/v1")
 app.include_router(status_router.router,  prefix="/api/v1")
+app.include_router(github_router.router,  prefix="/api/v1")
+app.include_router(upload_router.router,  prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])

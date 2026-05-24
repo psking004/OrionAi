@@ -20,7 +20,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AgentTeamResponse,
+  DebugInput,
+  DebugResponse,
   ErrorResponse,
+  FailurePrediction,
+  GitHubConnectInput,
+  GitHubConnection,
+  GitHubSyncResult,
   HealthStatus,
   LoginInput,
   Message,
@@ -31,7 +38,11 @@ import type {
   ProjectStatus,
   ProjectUpdate,
   RegisterInput,
+  TaskBreakdown,
+  TaskInput,
   TokenResponse,
+  UploadAnalysis,
+  UploadProjectZipBody,
   UserResponse
 } from './api.schemas';
 
@@ -998,4 +1009,819 @@ export const useGetNextSteps = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getGetNextStepsMutationOptions(options));
     }
+
+export const getConnectGithubUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/github/connect`
+}
+
+/**
+ * @summary Connect a GitHub repository via personal access token
+ */
+export const connectGithub = async (projectId: number,
+    gitHubConnectInput: GitHubConnectInput, options?: RequestInit): Promise<GitHubConnection> => {
+
+  return customFetch<GitHubConnection>(getConnectGithubUrl(projectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      gitHubConnectInput,)
+  }
+);}
+
+
+
+
+export const getConnectGithubMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof connectGithub>>, TError,{projectId: number;data: BodyType<GitHubConnectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof connectGithub>>, TError,{projectId: number;data: BodyType<GitHubConnectInput>}, TContext> => {
+
+const mutationKey = ['connectGithub'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof connectGithub>>, {projectId: number;data: BodyType<GitHubConnectInput>}> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  connectGithub(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConnectGithubMutationResult = NonNullable<Awaited<ReturnType<typeof connectGithub>>>
+    export type ConnectGithubMutationBody = BodyType<GitHubConnectInput>
+    export type ConnectGithubMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Connect a GitHub repository via personal access token
+ */
+export const useConnectGithub = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof connectGithub>>, TError,{projectId: number;data: BodyType<GitHubConnectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof connectGithub>>,
+        TError,
+        {projectId: number;data: BodyType<GitHubConnectInput>},
+        TContext
+      > => {
+      return useMutation(getConnectGithubMutationOptions(options));
+    }
+
+export const getGetGithubConnectionUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/github`
+}
+
+/**
+ * @summary Get GitHub connection for a project
+ */
+export const getGithubConnection = async (projectId: number, options?: RequestInit): Promise<GitHubConnection> => {
+
+  return customFetch<GitHubConnection>(getGetGithubConnectionUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetGithubConnectionQueryKey = (projectId: number,) => {
+    return [
+    `/api/projects/${projectId}/github`
+    ] as const;
+    }
+
+
+export const getGetGithubConnectionQueryOptions = <TData = Awaited<ReturnType<typeof getGithubConnection>>, TError = ErrorType<ErrorResponse>>(projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGithubConnection>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGithubConnectionQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGithubConnection>>> = ({ signal }) => getGithubConnection(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(projectId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGithubConnection>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetGithubConnectionQueryResult = NonNullable<Awaited<ReturnType<typeof getGithubConnection>>>
+export type GetGithubConnectionQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get GitHub connection for a project
+ */
+
+export function useGetGithubConnection<TData = Awaited<ReturnType<typeof getGithubConnection>>, TError = ErrorType<ErrorResponse>>(
+ projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGithubConnection>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetGithubConnectionQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDisconnectGithubUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/github`
+}
+
+/**
+ * @summary Disconnect GitHub repository
+ */
+export const disconnectGithub = async (projectId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDisconnectGithubUrl(projectId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDisconnectGithubMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGithub>>, TError,{projectId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof disconnectGithub>>, TError,{projectId: number}, TContext> => {
+
+const mutationKey = ['disconnectGithub'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof disconnectGithub>>, {projectId: number}> = (props) => {
+          const {projectId} = props ?? {};
+
+          return  disconnectGithub(projectId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DisconnectGithubMutationResult = NonNullable<Awaited<ReturnType<typeof disconnectGithub>>>
+
+    export type DisconnectGithubMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Disconnect GitHub repository
+ */
+export const useDisconnectGithub = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGithub>>, TError,{projectId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof disconnectGithub>>,
+        TError,
+        {projectId: number},
+        TContext
+      > => {
+      return useMutation(getDisconnectGithubMutationOptions(options));
+    }
+
+export const getSyncGithubUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/github/sync`
+}
+
+/**
+ * @summary Sync and analyze the connected GitHub repository
+ */
+export const syncGithub = async (projectId: number, options?: RequestInit): Promise<GitHubSyncResult> => {
+
+  return customFetch<GitHubSyncResult>(getSyncGithubUrl(projectId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getSyncGithubMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncGithub>>, TError,{projectId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof syncGithub>>, TError,{projectId: number}, TContext> => {
+
+const mutationKey = ['syncGithub'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof syncGithub>>, {projectId: number}> = (props) => {
+          const {projectId} = props ?? {};
+
+          return  syncGithub(projectId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SyncGithubMutationResult = NonNullable<Awaited<ReturnType<typeof syncGithub>>>
+
+    export type SyncGithubMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Sync and analyze the connected GitHub repository
+ */
+export const useSyncGithub = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncGithub>>, TError,{projectId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof syncGithub>>,
+        TError,
+        {projectId: number},
+        TContext
+      > => {
+      return useMutation(getSyncGithubMutationOptions(options));
+    }
+
+export const getUploadProjectZipUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/upload`
+}
+
+/**
+ * @summary Upload a ZIP file for AI analysis
+ */
+export const uploadProjectZip = async (projectId: number,
+    uploadProjectZipBody: UploadProjectZipBody, options?: RequestInit): Promise<UploadAnalysis> => {
+    const formData = new FormData();
+formData.append(`file`, uploadProjectZipBody.file);
+
+  return customFetch<UploadAnalysis>(getUploadProjectZipUrl(projectId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body:
+      formData,
+  }
+);}
+
+
+
+
+export const getUploadProjectZipMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProjectZip>>, TError,{projectId: number;data: BodyType<UploadProjectZipBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadProjectZip>>, TError,{projectId: number;data: BodyType<UploadProjectZipBody>}, TContext> => {
+
+const mutationKey = ['uploadProjectZip'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadProjectZip>>, {projectId: number;data: BodyType<UploadProjectZipBody>}> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  uploadProjectZip(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadProjectZipMutationResult = NonNullable<Awaited<ReturnType<typeof uploadProjectZip>>>
+    export type UploadProjectZipMutationBody = BodyType<UploadProjectZipBody>
+    export type UploadProjectZipMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Upload a ZIP file for AI analysis
+ */
+export const useUploadProjectZip = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadProjectZip>>, TError,{projectId: number;data: BodyType<UploadProjectZipBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadProjectZip>>,
+        TError,
+        {projectId: number;data: BodyType<UploadProjectZipBody>},
+        TContext
+      > => {
+      return useMutation(getUploadProjectZipMutationOptions(options));
+    }
+
+export const getListUploadsUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/uploads`
+}
+
+/**
+ * @summary List all upload analyses for a project
+ */
+export const listUploads = async (projectId: number, options?: RequestInit): Promise<UploadAnalysis[]> => {
+
+  return customFetch<UploadAnalysis[]>(getListUploadsUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListUploadsQueryKey = (projectId: number,) => {
+    return [
+    `/api/projects/${projectId}/uploads`
+    ] as const;
+    }
+
+
+export const getListUploadsQueryOptions = <TData = Awaited<ReturnType<typeof listUploads>>, TError = ErrorType<unknown>>(projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUploads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUploadsQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUploads>>> = ({ signal }) => listUploads(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(projectId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUploads>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListUploadsQueryResult = NonNullable<Awaited<ReturnType<typeof listUploads>>>
+export type ListUploadsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all upload analyses for a project
+ */
+
+export function useListUploads<TData = Awaited<ReturnType<typeof listUploads>>, TError = ErrorType<unknown>>(
+ projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUploads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListUploadsQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetLatestUploadUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/uploads/latest`
+}
+
+/**
+ * @summary Get the latest completed upload analysis
+ */
+export const getLatestUpload = async (projectId: number, options?: RequestInit): Promise<UploadAnalysis> => {
+
+  return customFetch<UploadAnalysis>(getGetLatestUploadUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLatestUploadQueryKey = (projectId: number,) => {
+    return [
+    `/api/projects/${projectId}/uploads/latest`
+    ] as const;
+    }
+
+
+export const getGetLatestUploadQueryOptions = <TData = Awaited<ReturnType<typeof getLatestUpload>>, TError = ErrorType<ErrorResponse>>(projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLatestUpload>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLatestUploadQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLatestUpload>>> = ({ signal }) => getLatestUpload(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(projectId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLatestUpload>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLatestUploadQueryResult = NonNullable<Awaited<ReturnType<typeof getLatestUpload>>>
+export type GetLatestUploadQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the latest completed upload analysis
+ */
+
+export function useGetLatestUpload<TData = Awaited<ReturnType<typeof getLatestUpload>>, TError = ErrorType<ErrorResponse>>(
+ projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLatestUpload>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLatestUploadQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAgentTeamUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/agents`
+}
+
+/**
+ * @summary Get AI multi-agent team recommendations (CTO, PM, QA, DevOps, Security)
+ */
+export const getAgentTeam = async (projectId: number, options?: RequestInit): Promise<AgentTeamResponse> => {
+
+  return customFetch<AgentTeamResponse>(getGetAgentTeamUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAgentTeamQueryKey = (projectId: number,) => {
+    return [
+    `/api/projects/${projectId}/agents`
+    ] as const;
+    }
+
+
+export const getGetAgentTeamQueryOptions = <TData = Awaited<ReturnType<typeof getAgentTeam>>, TError = ErrorType<unknown>>(projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAgentTeam>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAgentTeamQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAgentTeam>>> = ({ signal }) => getAgentTeam(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(projectId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAgentTeam>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAgentTeamQueryResult = NonNullable<Awaited<ReturnType<typeof getAgentTeam>>>
+export type GetAgentTeamQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get AI multi-agent team recommendations (CTO, PM, QA, DevOps, Security)
+ */
+
+export function useGetAgentTeam<TData = Awaited<ReturnType<typeof getAgentTeam>>, TError = ErrorType<unknown>>(
+ projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAgentTeam>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAgentTeamQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDebugProjectUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/debug`
+}
+
+/**
+ * @summary Submit logs or stack trace for AI debug analysis
+ */
+export const debugProject = async (projectId: number,
+    debugInput: DebugInput, options?: RequestInit): Promise<DebugResponse> => {
+
+  return customFetch<DebugResponse>(getDebugProjectUrl(projectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      debugInput,)
+  }
+);}
+
+
+
+
+export const getDebugProjectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof debugProject>>, TError,{projectId: number;data: BodyType<DebugInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof debugProject>>, TError,{projectId: number;data: BodyType<DebugInput>}, TContext> => {
+
+const mutationKey = ['debugProject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof debugProject>>, {projectId: number;data: BodyType<DebugInput>}> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  debugProject(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DebugProjectMutationResult = NonNullable<Awaited<ReturnType<typeof debugProject>>>
+    export type DebugProjectMutationBody = BodyType<DebugInput>
+    export type DebugProjectMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Submit logs or stack trace for AI debug analysis
+ */
+export const useDebugProject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof debugProject>>, TError,{projectId: number;data: BodyType<DebugInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof debugProject>>,
+        TError,
+        {projectId: number;data: BodyType<DebugInput>},
+        TContext
+      > => {
+      return useMutation(getDebugProjectMutationOptions(options));
+    }
+
+export const getGenerateTasksUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/tasks`
+}
+
+/**
+ * @summary Generate task breakdown from a feature description
+ */
+export const generateTasks = async (projectId: number,
+    taskInput: TaskInput, options?: RequestInit): Promise<TaskBreakdown> => {
+
+  return customFetch<TaskBreakdown>(getGenerateTasksUrl(projectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      taskInput,)
+  }
+);}
+
+
+
+
+export const getGenerateTasksMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateTasks>>, TError,{projectId: number;data: BodyType<TaskInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateTasks>>, TError,{projectId: number;data: BodyType<TaskInput>}, TContext> => {
+
+const mutationKey = ['generateTasks'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateTasks>>, {projectId: number;data: BodyType<TaskInput>}> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  generateTasks(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateTasksMutationResult = NonNullable<Awaited<ReturnType<typeof generateTasks>>>
+    export type GenerateTasksMutationBody = BodyType<TaskInput>
+    export type GenerateTasksMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Generate task breakdown from a feature description
+ */
+export const useGenerateTasks = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateTasks>>, TError,{projectId: number;data: BodyType<TaskInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateTasks>>,
+        TError,
+        {projectId: number;data: BodyType<TaskInput>},
+        TContext
+      > => {
+      return useMutation(getGenerateTasksMutationOptions(options));
+    }
+
+export const getPredictFailuresUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/predict`
+}
+
+/**
+ * @summary Predict deployment risks and failure points
+ */
+export const predictFailures = async (projectId: number, options?: RequestInit): Promise<FailurePrediction> => {
+
+  return customFetch<FailurePrediction>(getPredictFailuresUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPredictFailuresQueryKey = (projectId: number,) => {
+    return [
+    `/api/projects/${projectId}/predict`
+    ] as const;
+    }
+
+
+export const getPredictFailuresQueryOptions = <TData = Awaited<ReturnType<typeof predictFailures>>, TError = ErrorType<unknown>>(projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof predictFailures>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPredictFailuresQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof predictFailures>>> = ({ signal }) => predictFailures(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(projectId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof predictFailures>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PredictFailuresQueryResult = NonNullable<Awaited<ReturnType<typeof predictFailures>>>
+export type PredictFailuresQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Predict deployment risks and failure points
+ */
+
+export function usePredictFailures<TData = Awaited<ReturnType<typeof predictFailures>>, TError = ErrorType<unknown>>(
+ projectId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof predictFailures>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPredictFailuresQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
