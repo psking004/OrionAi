@@ -23,6 +23,9 @@ class User(Base):
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
     github_connections = relationship("GitHubConnection", back_populates="user", cascade="all, delete-orphan")
     upload_analyses = relationship("UploadAnalysis", back_populates="user", cascade="all, delete-orphan")
+    subscription = relationship("Subscription", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    credit_ledger = relationship("CreditLedger", back_populates="user", cascade="all, delete-orphan")
+    usage_events = relationship("CreditUsageEvent", back_populates="user", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_users_email_active", "email", "is_active"),

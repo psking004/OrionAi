@@ -596,3 +596,121 @@ export const PredictFailuresResponse = zod.object({
 })
 
 
+/**
+ * @summary Get available subscription plans
+ */
+export const GetPlansResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "price_inr": zod.number(),
+  "daily_credits": zod.number(),
+  "monthly_credits": zod.number(),
+  "features": zod.array(zod.string()),
+  "stripe_price_id": zod.string().nullish()
+})
+export const GetPlansResponse = zod.array(GetPlansResponseItem)
+
+
+/**
+ * @summary Get current plan and credit status
+ */
+export const GetBillingStatusResponse = zod.object({
+  "plan": zod.string(),
+  "subscription_status": zod.string(),
+  "daily_used": zod.number(),
+  "daily_limit": zod.number(),
+  "daily_remaining": zod.number(),
+  "monthly_used": zod.number(),
+  "monthly_limit": zod.number(),
+  "monthly_remaining": zod.number(),
+  "stripe_customer_id": zod.string().nullish(),
+  "stripe_subscription_id": zod.string().nullish(),
+  "current_period_end": zod.string().nullish(),
+  "cancel_at_period_end": zod.boolean(),
+  "feature_costs": zod.record(zod.string(), zod.number())
+})
+
+
+/**
+ * @summary Get credit usage history
+ */
+export const getUsageHistoryQueryLimitDefault = 50;
+
+export const GetUsageHistoryQueryParams = zod.object({
+  "limit": zod.coerce.number().default(getUsageHistoryQueryLimitDefault)
+})
+
+export const GetUsageHistoryResponse = zod.object({
+  "events": zod.array(zod.object({
+  "feature": zod.string(),
+  "credits_used": zod.number(),
+  "project_id": zod.number().nullish(),
+  "created_at": zod.coerce.date()
+})),
+  "total_events": zod.number()
+})
+
+
+/**
+ * @summary Create Stripe Checkout session
+ */
+export const CreateCheckoutSessionBody = zod.object({
+  "plan": zod.string(),
+  "success_url": zod.string(),
+  "cancel_url": zod.string()
+})
+
+export const CreateCheckoutSessionResponse = zod.object({
+  "checkout_url": zod.string(),
+  "session_id": zod.string()
+})
+
+
+/**
+ * @summary Create Stripe Customer Portal session
+ */
+export const CreateBillingPortalBody = zod.object({
+  "return_url": zod.string()
+})
+
+export const CreateBillingPortalResponse = zod.object({
+  "portal_url": zod.string()
+})
+
+
+/**
+ * @summary Cancel subscription at period end
+ */
+export const CancelSubscriptionResponse = zod.object({
+
+}).passthrough()
+
+
+/**
+ * @summary Get cross-project dashboard overview
+ */
+export const GetDashboardOverviewResponse = zod.object({
+  "user": zod.object({
+
+}).passthrough().optional(),
+  "projects": zod.object({
+
+}).passthrough().optional(),
+  "ai_alerts": zod.array(zod.object({
+
+}).passthrough()).optional(),
+  "top_recommendations": zod.array(zod.string()).optional(),
+  "top_risks": zod.array(zod.string()).optional(),
+  "recent_scans": zod.array(zod.object({
+
+}).passthrough()).optional(),
+  "github_velocity": zod.object({
+
+}).passthrough().optional(),
+  "credits": zod.object({
+
+}).passthrough().optional(),
+  "generated_at": zod.string().optional()
+})
+
+

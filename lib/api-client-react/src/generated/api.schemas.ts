@@ -350,6 +350,89 @@ export interface TaskBreakdown {
   recommended_sprint_weeks: number;
 }
 
+export type CreditStatusFeatureCosts = {[key: string]: number};
+
+export interface CreditStatus {
+  plan: string;
+  subscription_status: string;
+  daily_used: number;
+  daily_limit: number;
+  daily_remaining: number;
+  monthly_used: number;
+  monthly_limit: number;
+  monthly_remaining: number;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  current_period_end?: string | null;
+  cancel_at_period_end: boolean;
+  feature_costs: CreditStatusFeatureCosts;
+}
+
+export interface CheckoutSessionInput {
+  plan: string;
+  success_url: string;
+  cancel_url: string;
+}
+
+export interface CheckoutSessionOutput {
+  checkout_url: string;
+  session_id: string;
+}
+
+export interface BillingPortalInput {
+  return_url: string;
+}
+
+export interface BillingPortalOutput {
+  portal_url: string;
+}
+
+export interface UsageEventItem {
+  feature: string;
+  credits_used: number;
+  project_id?: number | null;
+  created_at: string;
+}
+
+export interface UsageHistory {
+  events: UsageEventItem[];
+  total_events: number;
+}
+
+export interface PlanInfo {
+  id: string;
+  name: string;
+  price_inr: number;
+  daily_credits: number;
+  monthly_credits: number;
+  features: string[];
+  stripe_price_id?: string | null;
+}
+
+export type DashboardOverviewUser = { [key: string]: unknown };
+
+export type DashboardOverviewProjects = { [key: string]: unknown };
+
+export type DashboardOverviewAiAlertsItem = { [key: string]: unknown };
+
+export type DashboardOverviewRecentScansItem = { [key: string]: unknown };
+
+export type DashboardOverviewGithubVelocity = { [key: string]: unknown };
+
+export type DashboardOverviewCredits = { [key: string]: unknown };
+
+export interface DashboardOverview {
+  user?: DashboardOverviewUser;
+  projects?: DashboardOverviewProjects;
+  ai_alerts?: DashboardOverviewAiAlertsItem[];
+  top_recommendations?: string[];
+  top_risks?: string[];
+  recent_scans?: DashboardOverviewRecentScansItem[];
+  github_velocity?: DashboardOverviewGithubVelocity;
+  credits?: DashboardOverviewCredits;
+  generated_at?: string;
+}
+
 export type FailurePredictionRiskLevel = typeof FailurePredictionRiskLevel[keyof typeof FailurePredictionRiskLevel];
 
 
@@ -375,4 +458,10 @@ export interface FailurePrediction {
 export type UploadProjectZipBody = {
   file: Blob;
 };
+
+export type GetUsageHistoryParams = {
+limit?: number;
+};
+
+export type CancelSubscription200 = { [key: string]: unknown };
 

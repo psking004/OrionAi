@@ -28,6 +28,10 @@ tags:
     description: AI debug engine
   - name: tasks
     description: Task breakdown and roadmap
+  - name: billing
+    description: Subscription, credits, Stripe
+  - name: dashboard
+    description: Overview dashboard
 
 paths:
   /healthz:
@@ -580,6 +584,130 @@ paths:
               schema:
                 $ref: "#/components/schemas/FailurePrediction"
 
+  /billing/plans:
+    get:
+      operationId: getPlans
+      tags: [billing]
+      summary: Get available subscription plans
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlanInfo"
+
+  /billing/status:
+    get:
+      operationId: getBillingStatus
+      tags: [billing]
+      summary: Get current plan and credit status
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditStatus"
+
+  /billing/usage:
+    get:
+      operationId: getUsageHistory
+      tags: [billing]
+      summary: Get credit usage history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageHistory"
+
+  /billing/checkout:
+    post:
+      operationId: createCheckoutSession
+      tags: [billing]
+      summary: Create Stripe Checkout session
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutSessionInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSessionOutput"
+
+  /billing/portal:
+    post:
+      operationId: createBillingPortal
+      tags: [billing]
+      summary: Create Stripe Customer Portal session
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillingPortalInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPortalOutput"
+
+  /billing/cancel:
+    post:
+      operationId: cancelSubscription
+      tags: [billing]
+      summary: Cancel subscription at period end
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /dashboard/overview:
+    get:
+      operationId: getDashboardOverview
+      tags: [dashboard]
+      summary: Get cross-project dashboard overview
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardOverview"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1104,6 +1232,154 @@ components:
           type: number
         recommended_sprint_weeks:
           type: integer
+
+    CreditStatus:
+      type: object
+      required: [plan, subscription_status, daily_used, daily_limit, daily_remaining, monthly_used, monthly_limit, monthly_remaining, cancel_at_period_end, feature_costs]
+      properties:
+        plan:
+          type: string
+        subscription_status:
+          type: string
+        daily_used:
+          type: integer
+        daily_limit:
+          type: integer
+        daily_remaining:
+          type: integer
+        monthly_used:
+          type: integer
+        monthly_limit:
+          type: integer
+        monthly_remaining:
+          type: integer
+        stripe_customer_id:
+          type: string
+          nullable: true
+        stripe_subscription_id:
+          type: string
+          nullable: true
+        current_period_end:
+          type: string
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
+        feature_costs:
+          type: object
+          additionalProperties:
+            type: integer
+
+    CheckoutSessionInput:
+      type: object
+      required: [plan, success_url, cancel_url]
+      properties:
+        plan:
+          type: string
+        success_url:
+          type: string
+        cancel_url:
+          type: string
+
+    CheckoutSessionOutput:
+      type: object
+      required: [checkout_url, session_id]
+      properties:
+        checkout_url:
+          type: string
+        session_id:
+          type: string
+
+    BillingPortalInput:
+      type: object
+      required: [return_url]
+      properties:
+        return_url:
+          type: string
+
+    BillingPortalOutput:
+      type: object
+      required: [portal_url]
+      properties:
+        portal_url:
+          type: string
+
+    UsageEventItem:
+      type: object
+      required: [feature, credits_used, created_at]
+      properties:
+        feature:
+          type: string
+        credits_used:
+          type: integer
+        project_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    UsageHistory:
+      type: object
+      required: [events, total_events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsageEventItem"
+        total_events:
+          type: integer
+
+    PlanInfo:
+      type: object
+      required: [id, name, price_inr, daily_credits, monthly_credits, features]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price_inr:
+          type: integer
+        daily_credits:
+          type: integer
+        monthly_credits:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        stripe_price_id:
+          type: string
+          nullable: true
+
+    DashboardOverview:
+      type: object
+      properties:
+        user:
+          type: object
+        projects:
+          type: object
+        ai_alerts:
+          type: array
+          items:
+            type: object
+        top_recommendations:
+          type: array
+          items:
+            type: string
+        top_risks:
+          type: array
+          items:
+            type: string
+        recent_scans:
+          type: array
+          items:
+            type: object
+        github_velocity:
+          type: object
+        credits:
+          type: object
+        generated_at:
+          type: string
 
     FailurePrediction:
       type: object

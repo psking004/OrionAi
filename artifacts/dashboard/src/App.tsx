@@ -9,6 +9,8 @@ import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import ProjectDetail from "@/pages/project-detail";
+import BillingPage from "@/pages/billing";
+import OverviewPage from "@/pages/overview";
 import { Layout } from "@/components/layout";
 
 const queryClient = new QueryClient();
@@ -44,7 +46,13 @@ function Router() {
       <Route path="/projects/:id">
         {(params) => <ProtectedRoute component={ProjectDetail} id={params.id} />}
       </Route>
-      
+      <Route path="/overview">
+        <ProtectedRoute component={OverviewPage} />
+      </Route>
+      <Route path="/billing">
+        <ProtectedRoute component={BillingPage} />
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
