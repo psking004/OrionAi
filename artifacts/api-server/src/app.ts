@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import type { Readable } from "node:stream";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -38,7 +39,8 @@ app.use(express.urlencoded({ extended: true }));
 //
 // /api/healthz is kept local (served by the api-server itself).
 
-const FASTAPI_BASE = "http://localhost:8000";
+const FASTAPI_BASE = process.env["FASTAPI_URL"] ?? "http://localhost:8000";
+const FASTAPI_TIMEOUT_MS = Number(process.env["FASTAPI_TIMEOUT_MS"] ?? 120_000);
 const SKIP_REQ_HEADERS = new Set(["host", "connection", "transfer-encoding", "content-length"]);
 const SKIP_RES_HEADERS = new Set(["transfer-encoding", "connection", "keep-alive"]);
 const FASTAPI_PATHS = /^\/api\/(auth|projects)(\/|$)/;
@@ -61,16 +63,26 @@ async function proxyToFastApi(
     }
 
     const hasBody = !["GET", "HEAD", "DELETE", "OPTIONS"].includes(req.method.toUpperCase());
-    const body = hasBody && req.body !== undefined ? JSON.stringify(req.body) : undefined;
-    if (body !== undefined) {
+    const contentType = String(req.headers["content-type"] ?? "").toLowerCase();
+    // express.json()/urlencoded() only consume those types; anything else
+    // (e.g. multipart ZIP uploads) is still an unread stream, so pipe it as-is.
+    const isParsed = contentType.includes("application/json") || contentType.includes("application/x-www-form-urlencoded");
+    let body: string | Readable | undefined;
+    if (hasBody && isParsed && req.body !== undefined) {
+      body = JSON.stringify(req.body);
       forwardHeaders["content-type"] = "application/json";
+    } else if (hasBody && contentType) {
+      body = req;
     }
 
     const response = await fetch(target, {
       method: req.method,
       headers: forwardHeaders,
-      body,
-    });
+      body: body as RequestInit["body"],
+      // Required by Node's fetch when the body is a stream.
+      ...(body === req ? { duplex: "half" } : {}),
+      signal: AbortSignal.timeout(FASTAPI_TIMEOUT_MS),
+    } as RequestInit);
 
     res.status(response.status);
     for (const [k, v] of response.headers.entries()) {
@@ -82,6 +94,11 @@ async function proxyToFastApi(
     const text = await response.text();
     res.send(text);
   } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError") {
+      logger.error({ err }, "FastAPI proxy timeout");
+      res.status(504).json({ detail: "FastAPI backend timed out" });
+      return;
+    }
     logger.error({ err }, "FastAPI proxy error");
     res.status(502).json({ detail: "FastAPI backend unavailable" });
   }
