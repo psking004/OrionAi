@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 //
 // /api/healthz is kept local (served by the api-server itself).
 
-const FASTAPI_BASE = "http://localhost:8000";
+const FASTAPI_BASE = process.env["FASTAPI_URL"] ?? "http://localhost:8000";
 const SKIP_REQ_HEADERS = new Set(["host", "connection", "transfer-encoding", "content-length"]);
 const SKIP_RES_HEADERS = new Set(["transfer-encoding", "connection", "keep-alive"]);
 const FASTAPI_PATHS = /^\/api\/(auth|projects)(\/|$)/;
