@@ -54,7 +54,7 @@ Backend (`backend/.env`): `DATABASE_URL`, `SECRET_KEY` (required in production),
 `RATE_LIMIT_WINDOW`, `DEBUG`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`,
 `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRO_PRICE_ID`, `STRIPE_TEAM_PRICE_ID` (optional).
 
-Node services: `PORT`, `BASE_PATH`, `FASTAPI_URL`, `API_PROXY_TARGET`, `NODE_ENV`
+Node services: `PORT`, `BASE_PATH`, `FASTAPI_URL`, `FASTAPI_TIMEOUT_MS`, `API_PROXY_TARGET`, `NODE_ENV`
 (all optional, defaults in `.env.example`). Backend launcher: `HOST`, `PORT`, `RELOAD`.
 
 On Replit everything above is injected automatically and `.replit` still works.
