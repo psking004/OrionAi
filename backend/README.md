@@ -26,22 +26,19 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 Interactive docs: http://localhost:8000/docs
 
+### 4. Test
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+The tests use FastAPI's `TestClient` and don't need a database.
+
 ---
 
 ## Deployment
 
-### Replit
-Set these secrets in the Replit Secrets panel:
-- `DATABASE_URL` — your Postgres connection string
-- `SECRET_KEY` — a long random string
-
-Run command (already configured):
-```
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
 ### Render / Railway
-1. Set the same environment variables above in the dashboard
+1. Set `DATABASE_URL` (your Postgres connection string) and `SECRET_KEY` (a long random string) in the dashboard
 2. Set the start command to:
    ```
    uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -67,6 +64,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 | GET | `/api/v1/projects/{id}/messages` | Yes | Get last 10 messages |
 | POST | `/api/v1/projects/{id}/status` | Yes | Analyze & get project health |
 | POST | `/api/v1/projects/{id}/next-steps` | Yes | Get prioritized roadmap |
+
+Plus GitHub, upload/analysis, agents, debug, tasks, prediction, billing and dashboard routes; see the root README or `/docs` for the full list.
 
 All protected routes require: `Authorization: Bearer <token>`
 
@@ -94,12 +93,12 @@ The engine analyzes your project's chat history to:
 ---
 
 ## Security
-- Passwords hashed with bcrypt (passlib)
+- Passwords hashed with bcrypt
 - JWT tokens signed with HS256
-- Rate limiting: 10 req/min per IP
+- Rate limiting: 60 req/min per IP by default (`RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW`)
 - SQL injection impossible via SQLAlchemy ORM
 - Input validated with Pydantic v2
-- Request body capped at 1 MB
+- Request body capped at 110 MB (room for 100 MB ZIP uploads)
 - No secrets in code — all via environment variables
 
 ---
@@ -127,8 +126,10 @@ backend/
 │   │   └── status_service.py
 │   └── utils/
 │       └── logger.py
+├── tests/                    # pytest suite (TestClient)
 ├── requirements.txt
+├── requirements-dev.txt      # + pytest, httpx
+├── pytest.ini
 ├── .env.example
-├── replit.nix
 └── README.md
 ```
